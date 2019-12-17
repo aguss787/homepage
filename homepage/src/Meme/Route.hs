@@ -5,14 +5,15 @@ module Meme.Route
     )
 where
 
-import           Web.Scotty                    as S
 import           Control.Monad.IO.Class
 import           Meme.Internal.Getter
+import           Utils.Env              as Env
+import           Web.Scotty             as S
 
-route :: S.ScottyM ()
-route = do
+route :: Env.Env -> S.ScottyM ()
+route env = do
     S.get "/meme/" $ do
-        S.json =<< liftIO getMemes
+        (=<<) S.json $ liftIO $ getMemes env
     S.get "/meme/:filename" $ do
         filename <- param "filename"
-        (=<<) S.file $ liftIO . getMeme $ filename
+        S.file $ getMeme env filename

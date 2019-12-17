@@ -1,2 +1,9 @@
 meme:
   memeDir: "data/meme"
+
+db:
+  host: localhost
+  port: 5432
+  username: postgres
+  password: postgres
+  database: profile

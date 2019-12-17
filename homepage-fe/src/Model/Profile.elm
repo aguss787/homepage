@@ -1,10 +1,18 @@
-module Model.Profile exposing (..)
+module Model.Profile exposing (Profile, profileDecoder, Model)
 
-type alias Model =
-    { imageUrl : List String
+import Json.Decode exposing (..)
+
+type alias Profile =
+    { name : String
+    , picture : String
+    , tagline : String
     }
 
-emptyModel : Model
-emptyModel =
-    { imageUrl = []
+profileDecoder = map3 Profile
+    (field "profileName" string)
+    (field "profilePicture" string)
+    (field "profileTagline" string)
+
+type alias Model =
+    { profile : Profile
     }

@@ -1,36 +1,34 @@
 {-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE OverloadedStrings #-}
 
 module Meme.Internal.GetterSpec where
 
-import           Test.Hspec
-import           Meme.Internal.Getter
-import           Utils.Directory
-import           Utils.Config
 import           Control.Monad.State
-
-baseDirectory :: FilePath
-baseDirectory = "meme/dir"
-
-directoryContent :: [FilePath]
-directoryContent = ["a", "b", "c"]
-
-file :: FilePath
-file = head directoryContent
+import           Debug.Trace
+import qualified Fixtures             as F
+import           Meme.Internal.Getter
+import           Test.Hspec
+import           Utils.Config
+import           Utils.Directory
+import           Utils.Env
 
 instance ConfigHandler (StateT () IO) where
-    getMemeDir = return baseDirectory
+    getMemeDir = return F.directory
+    getConfig  = undefined
 
 instance DirIO (StateT () IO) where
-    listDir path = case path of
-        baseDirectory -> return directoryContent
+    listDir path =
+        return $ if path == F.directory
+            then F.directoryContent
+            else undefined
 
 spec :: Spec
 spec = do
     describe "getMemes" $ do
         it "Returns file list from config dir" $ do
-            evalStateT getMemes () `shouldReturn` directoryContent
+            evalStateT (getMemes F.env) () `shouldReturn` F.directoryContent
 
     describe "getMeme" $ do
         it "Returns file path" $ do
-            evalStateT (getMeme file) ()
-                `shouldReturn` (baseDirectory ++ "/" ++ file)
+            getMeme F.env F.file
+                `shouldBe` (F.directory ++ "/" ++ F.file)

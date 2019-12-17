@@ -29,6 +29,12 @@ dependencies:
 - hspec
 - mtl
 - hlint
+- persistent-template
+- persistent-postgresql
+- persistent
+- monad-logger
+- bytestring
+- utf8-string
 
 library:
   source-dirs: src

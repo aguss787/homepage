@@ -1,7 +1,6 @@
 module Main exposing (main)
 
 import Browser exposing (..)
-import Browser.Navigation as Navigation
 import Url exposing (Url)
 import Html exposing (text)
 import Utils.View.Adaptor exposing (fromAdaptor, toAdaptor)
@@ -9,22 +8,25 @@ import View.Profile as Profile
 import Update.Profile as Profile
 import Message.Routing as Routing
 import Update.Routing as Routing
-import View.Container exposing (container)
+import View.Container exposing (templateContainer)
 import Message exposing (Message)
 import Page as Page
-import Model exposing (Model, emptySpecificModel)
+import View.Loading as Loading
+import Model exposing (Model)
+import Init exposing (init)
+import Bootstrap.Navbar as Navbar
+import Message.Container as Container
+import Update.Container as Container
 
 view : Model -> Document Message
 view model =
     fromAdaptor
-        <| container
+        <| templateContainer
         <| toAdaptor
             model
             <| case model.page of
                 Page.Loading ->
-                    { title = "Loading"
-                    , body = [text "loading..."]
-                    }
+                    Loading.view
 
                 Page.Failure ->
                     { title = "Error"
@@ -34,9 +36,7 @@ view model =
                 Page.Profile ->
                     Profile.view model.model.profile
 
-init : () -> Url -> Navigation.Key -> ( Model, Cmd Message )
-init _ url key =
-    ( {navKey = key, model = emptySpecificModel, page = Page.Loading}, Profile.fetchCatImageUrl )
+
 
 
 update : Message -> Model -> ( Model, Cmd Message )
@@ -48,19 +48,26 @@ update msg model =
         Message.RoutingMessage message ->
             Routing.update message model
 
-        _ -> (model, Cmd.none)
+        Message.ContainerMessage message ->
+            Container.update message model
+
+        Message.None -> (model, Cmd.none)
 
 onUrlRequest : UrlRequest -> Message
 onUrlRequest urlRequest =  case urlRequest of
-    Internal _ -> Message.None
+    Internal url -> Message.RoutingMessage (Routing.InternalRequest url)
     External url -> Message.RoutingMessage (Routing.ExternalRequest url)
+
+subscriptions : Model -> Sub Message
+subscriptions model =
+    Navbar.subscriptions model.model.container.navbar (\x -> Message.ContainerMessage <| Container.NavbarMsg x)
 
 main =
     Browser.application
         { init = init
         , view = view
         , update = update
-        , subscriptions = \_ -> Sub.none
+        , subscriptions = subscriptions
         , onUrlRequest = onUrlRequest
         , onUrlChange = \url -> Debug.log ("onchange " ++ Url.toString url) Message.None
         }

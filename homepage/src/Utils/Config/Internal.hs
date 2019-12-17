@@ -2,23 +2,34 @@
 
 module Utils.Config.Internal where
 
-import           GHC.Generics
-import           Control.Monad.IO.Class
 import           Control.Arrow
-import qualified Data.Yaml                     as Yaml
+import           Control.Monad.IO.Class
 import           Data.Aeson
+import qualified Data.Yaml              as Yaml
+import           GHC.Generics
 
-newtype Config = Config {
-    meme :: MemeConfig
-} deriving (Generic, Show, Eq)
+data Config = Config
+    { meme :: MemeConfig
+    , db   :: DBConfig
+    } deriving (Generic, Show, Eq)
 
 instance FromJSON Config
 
-newtype MemeConfig = MemeConfig {
-    memeDir :: String
-} deriving (Generic, Show, Eq)
+newtype MemeConfig = MemeConfig
+    { memeDir :: String
+    } deriving (Generic, Show, Eq)
 
 instance FromJSON MemeConfig
+
+data DBConfig = DBConfig
+    { host     :: String
+    , port     :: Int
+    , username :: String
+    , password :: String
+    , database :: String
+    } deriving (Generic, Show, Eq)
+
+instance FromJSON DBConfig
 
 class (MonadIO m) => ConfigIO m where
     decodeFileEither :: FilePath
@@ -35,3 +46,6 @@ getConfig = either (error . show) id <$> decodeFileEither getConfigFilePath
 
 getMemeDir :: ConfigIO m => m FilePath
 getMemeDir = (meme >>> memeDir) <$> getConfig
+
+getDBConfig :: ConfigIO m => m DBConfig
+getDBConfig = db <$> getConfig

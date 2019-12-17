@@ -3,6 +3,7 @@ module Update.Profile exposing (..)
 import Http
 import Message exposing (Message)
 import Message.Profile as Profile
+import Model.Profile as Profile
 import Json.Decode exposing (string, list)
 import Page as Page
 import Model exposing (Model)
@@ -10,8 +11,8 @@ import Model exposing (Model)
 fetchCatImageUrl : Cmd Message
 fetchCatImageUrl =
     Http.get
-        { url = "http://localhost:8080/meme"
-        , expect = Http.expectJson (\x -> Message.ProfileMessage (Profile.GotResult x)) (list string)
+        { url = "http://localhost:8080/profile"
+        , expect = Http.expectJson (\x -> Message.ProfileMessage (Profile.GotResult x)) Profile.profileDecoder
         }
 
 update : Profile.Message -> Model -> (Model, Cmd msg)
@@ -19,7 +20,7 @@ update message model =
     case message of
         Profile.GotResult result ->
             case result of
-                Ok imageUrl ->
+                Ok profile ->
                     let
                         oldModel = model.model
                         oldProfile = oldModel.profile
@@ -30,7 +31,7 @@ update message model =
                                 { oldModel
                                 | profile =
                                     { oldProfile
-                                    | imageUrl = imageUrl
+                                    | profile = profile
                                     }
                                 }
                             }

@@ -1,7 +1,7 @@
 module Utils.Directory where
 
-import qualified System.Directory              as Dir
 import           Control.Monad.IO.Class
+import qualified System.Directory       as Dir
 
 class MonadIO m => DirIO m where
     listDir :: FilePath -> m [FilePath]

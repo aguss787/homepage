@@ -1,4 +1,7 @@
-{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE FlexibleInstances     #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE OverloadedStrings     #-}
+
 
 module WebService
     ( webService
@@ -6,19 +9,34 @@ module WebService
 where
 
 
-import qualified Web.Scotty                    as S
-import qualified Data.Text.Lazy                as T
 import           Control.Monad.IO.Class
+import           Control.Monad.Logger
+import           Control.Monad.Reader
+import           Data.ByteString.UTF8          as BSU
+import qualified Data.Text.Lazy                as T
+import           Database.Persist.Postgresql
+import           Database.Persist.Sql
 import qualified Meme.Route                    as Meme
+import qualified Profile.Route                 as Profile
+import qualified Utils.Config                  as Config
+import           Utils.Env
+import qualified Web.Scotty                    as S
+
+import qualified Database.Persist as P
 
 webService :: IO ()
-webService = S.scotty 8080 $ do
-    Meme.route
-    S.get "/" $ do
-        S.text "test"
-    S.get "/test/:asd" $ do
-        arg <- S.param "asd" :: S.ActionM Int
-        S.text . T.pack $ show arg
-    S.get "/test/:asd" $ do
-        arg <- S.param "asd" :: S.ActionM T.Text
-        S.text $ "other | " <> arg
+webService = do
+    config <- Config.getConfig
+
+    let connStr = BSU.fromString $ Config.getDbConnectionString config
+    pool <-
+        (runStderrLoggingT $ createPostgresqlPool connStr 10) :: IO
+            ConnectionPool
+
+    let env = Env { config = config, dbPool = pool }
+
+    S.scotty 8080 $ do
+        Meme.route env
+        Profile.route env
+        S.get "/ping" $ do
+            S.text "test"
