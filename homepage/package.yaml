@@ -35,6 +35,7 @@ dependencies:
 - monad-logger
 - bytestring
 - utf8-string
+- wai-cors
 
 library:
   source-dirs: src

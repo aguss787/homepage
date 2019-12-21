@@ -1,7 +1,0 @@
-version: "3"
-services:
-  homepage: 
-    build:
-      context: .
-      dockerfile: homepage.dockerfile
-      

@@ -12,6 +12,7 @@ import           Control.Monad.IO.Class
 import           Data.Functor.Identity
 import           System.Directory
 import           Utils.Config.Internal  as Internal
+import           Text.Printf
 
 class MonadIO m => ConfigHandler m where
     getConfig  :: m Config
@@ -21,6 +22,14 @@ instance ConfigHandler IO where
     getMemeDir = Internal.getMemeDir
     getConfig  = Internal.getConfig
 
-connStr = "host=localhost dbname=profile user=postgres password=postgres port=5432"
+connStrFormat = "host=%s dbname=%s user=%s password=%s port=%d"
 getDbConnectionString :: Config -> String
-getDbConnectionString _ = connStr
+getDbConnectionString config = 
+    printf connStrFormat host dbname user password port
+    where
+        dbConfig = db config
+        host = Internal.host dbConfig
+        dbname = Internal.database dbConfig
+        user = Internal.username dbConfig
+        password = Internal.password dbConfig
+        port = Internal.port dbConfig

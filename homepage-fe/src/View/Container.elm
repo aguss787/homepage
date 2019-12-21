@@ -3,9 +3,11 @@ module View.Container exposing (templateContainer)
 import Browser exposing (Document)
 import Html exposing (Html, text, node)
 import Html.Attributes exposing (href, rel)
+import Html.Styled exposing (div, toUnstyled, fromUnstyled)
+import Html.Styled.Attributes exposing (css)
+import Css exposing (..)
 import Utils.View.Adaptor exposing (Adaptor)
-import Bootstrap.CDN as CDN
-import Bootstrap.Grid exposing (container, simpleRow, col)
+import Bootstrap.Grid exposing (containerFluid, container, simpleRow, col)
 import Bootstrap.Navbar as Navbar
 import Message as Message
 import Message.Container as Container
@@ -26,7 +28,7 @@ templateContainer previous =
                    }
         }
 
-css str =
+cssLink str =
     node "link"
         [ rel "stylesheet"
         , href str
@@ -35,21 +37,28 @@ css str =
 
 template : Model -> List (Html Message) -> List (Html Message)
 template model content =
-    [ css "https://agus.dev/bootstrap.min.css"
-    , css "https://agus.dev/font-awesome.min.css"
+    [ cssLink "https://agus.dev/bootstrap.min.css"
+    , cssLink "https://agus.dev/font-awesome.min.css"
     , container []
         [ Navbar.config (\x -> Message.ContainerMessage <| Container.NavbarMsg x)
           |> Navbar.withAnimation
-          |> Navbar.collapseSmall
+          |> Navbar.fixTop
           |> Navbar.lightCustom Color.white
-          |> Navbar.brand [ href "#"] [ text "Agus.dev"]
+          |> Navbar.brand [ href "/#"] [ text "Agus.dev"]
           |> Navbar.items
-              [ Navbar.itemLink [href "#profile"] [ text "Profile"]
-              , Navbar.itemLink [href "https://agus.dev/resume.mp4"]  [ text "Resume"]
+              [ Navbar.itemLink [href "https://agus.dev/resume.mp4"]  [ text "Resume"]
               ]
           |> Navbar.view model.model.container.navbar
         , simpleRow
-            [ col [] content
+            [ col []
+                [ toUnstyled <| div
+                    [ css
+                        [ paddingTop <| px 50
+                        ]
+                    ]
+                    <| List.map fromUnstyled content
+
+                ]
             ]
         ]
     ]

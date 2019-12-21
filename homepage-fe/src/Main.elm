@@ -69,5 +69,5 @@ main =
         , update = update
         , subscriptions = subscriptions
         , onUrlRequest = onUrlRequest
-        , onUrlChange = \url -> Debug.log ("onchange " ++ Url.toString url) Message.None
+        , onUrlChange = Message.RoutingMessage << Routing.InternalJump
         }

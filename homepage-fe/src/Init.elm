@@ -31,9 +31,13 @@ emptySpecificModel =
         }
     , profile =
         { profile =
-            { name = ""
-            , picture = ""
-            , tagline = ""
+            { profile =
+                { name = ""
+                , picture = ""
+                , tagline = ""
+                }
+            , educations = []
+            , projects = []
             }
         }
     }

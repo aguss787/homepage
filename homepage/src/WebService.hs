@@ -21,8 +21,7 @@ import qualified Profile.Route                 as Profile
 import qualified Utils.Config                  as Config
 import           Utils.Env
 import qualified Web.Scotty                    as S
-
-import qualified Database.Persist as P
+import           Network.Wai.Middleware.Cors
 
 webService :: IO ()
 webService = do
@@ -36,6 +35,8 @@ webService = do
     let env = Env { config = config, dbPool = pool }
 
     S.scotty 8080 $ do
+        S.middleware simpleCors
+        
         Meme.route env
         Profile.route env
         S.get "/ping" $ do
