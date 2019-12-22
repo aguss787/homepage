@@ -34,7 +34,7 @@ view model =
                 [ css
                     [ display tableCell
                     , verticalAlign middle
-                    , width <| pct 50
+                    , width <| pct 75
                     ]
                 ]
                 [ div
@@ -53,7 +53,7 @@ view model =
                             [ fontFamilies ["monospace"]
                             ]
                         ]
-                        [ text profile.tagline
+                        [ div [] <| List.map fromUnstyled <| Markdown.toHtml Nothing profile.tagline
                         ]
                     ]
                 ]
@@ -111,7 +111,7 @@ view model =
                                     [ text profile.name
                                     ]
                                 , hr [ css [ width <| pct 50 ] ] []
-                                , text profile.tagline
+                                , div [] <| List.map fromUnstyled <| Markdown.toHtml Nothing profile.tagline
                                 ]
                             ]
                         ]
