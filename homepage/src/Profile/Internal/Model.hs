@@ -39,6 +39,7 @@ Education
     until String
     description String
     picture String
+    active Bool
     deriving Show
     deriving Eq
     deriving Generic
@@ -61,10 +62,44 @@ Project
 
 instance ToJSON Project
 
+share
+  [mkPersist sqlSettings, mkMigrate "migrateAchievement"]
+  [persistLowerCase|
+Achievement
+    name String
+    date String
+    description String
+    picture String
+    deriving Show
+    deriving Eq
+    deriving Generic
+|]
+
+instance ToJSON Achievement
+
+share
+  [mkPersist sqlSettings, mkMigrate "migrateExperience"]
+  [persistLowerCase|
+Experience
+    name String
+    info String
+    from String
+    until String
+    description String
+    picture String
+    deriving Show
+    deriving Eq
+    deriving Generic
+|]
+
+instance ToJSON Experience
+
 data CompleteProfile = CompleteProfile
   { profile :: Maybe Profile
   , educations :: [Education]
   , projects :: [Project]
+  , experiences :: [Experience]
+  , achievements :: [Achievement]
   }
   deriving (Show, Eq, Generic)
 

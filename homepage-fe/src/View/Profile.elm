@@ -7,11 +7,12 @@ import Html.Styled exposing (..)
 import Html.Styled.Attributes exposing (css, href, src, class, id, target)
 import Model.Profile as Profile
 import Bootstrap.Grid as Grid
-import Bootstrap.Grid.Col as Col
 import Bootstrap.Card as Card
 import Bootstrap.Card.Block as Block
-import Bootstrap.Utilities.Spacing as Spacing
 import Markdown
+import Message
+import Maybe
+import Utils.Either exposing (..)
 
 view : Profile.Model -> Document msg
 view model =
@@ -20,12 +21,6 @@ view model =
         educations = model.profile.educations
         projects = model.profile.projects
 
-        name separatorLength = div
-            []
-            [ text profile.name
-            , hr [ css [ width <| pct separatorLength ] ] []
-            , text profile.tagline
-            ]
         horizontalName = div [class "d-none d-sm-block"] [ div
             [ css
                 [ verticalAlign middle
@@ -133,133 +128,6 @@ view model =
                     ]
                 ]
             ]
-        educationCardHorizontal data = div
-            [ class "d-none d-sm-block"
-            , css
-                [ marginBottom <| px 10
-                ]
-            ]
-            [ Card.config []
-                |> Card.block []
-                    [ Block.text []
-                        [ toUnstyled <| div
-                            [ css
-                                [ position relative
-                                , float left
-                                , height <| pct 100
-                                ]
-                            ]
-                            [ img
-                                  [ src data.picture
-                                  , css
-                                      [ borderRadius <| pct 5
-                                      , height <| px 150
-                                      , width <| px 120
-                                      ]
-                                  ] []
-                            ]
-                        , toUnstyled <| div
-                            [ css
-                                [ marginLeft <| px 135
-                                ]
-                            ]
-                            [ div
-                                [ css [ marginBottom <| px 10 ]
-                                ]
-                                [ h4
-                                    [ css
-                                        [ marginBottom <| px 0
-                                        ]
-                                    ]
-                                    [ text data.institution ]
-                                , div
-                                    [ css
-                                        [ fontSize <| px 15
-                                        ]
-                                    ]
-                                    [ text data.info ]
-                                , div
-                                    [ css
-                                        [ fontSize <| px 13
-                                        ]
-                                    ]
-                                    [ text <| data.from ++ " - " ++ data.until ]
-                                ]
-                            , div []
-                                <| List.map fromUnstyled <| Markdown.toHtml Nothing data.description
-                            ]
-                        ]
-                    ]
-                |> Card.view
-                |> fromUnstyled
-            ]
-
-        educationCardVertical data = div
-            [ class "d-block d-sm-none"
-            , css
-                [ marginBottom <| px 10
-                ]
-            ]
-            [ Card.config []
-                |> Card.block []
-                    [ Block.text [] [ toUnstyled <| div []
-                        [ div
-                            [ css
-                                [ Css.textAlign center
-                                ]
-                            ]
-                            [ img
-                                  [ src <| data.picture
-                                  , css
-                                      [ borderRadius <| pct 5
-                                      , height <| px 150
-                                      , width <| px 120
-                                      ]
-                                  ] []
-                            , h4 [] [ text data.institution ]
-                            , div
-                                  [ css
-                                      [ fontSize <| px 15
-                                      ]
-                                  ]
-                                  [ text data.info ]
-                            , div
-                                  [ css
-                                      [ fontSize <| px 13
-                                      ]
-                                  ]
-                                  [ text <| data.from ++ " - " ++ data.until ]
-                            ]
-                        , hr [] []
-                        , div []
-                            [ div []
-                                <| List.map fromUnstyled <| Markdown.toHtml Nothing data.description
-                            ]
-                        ]
-                    ] ]
-                |> Card.view
-                |> fromUnstyled
-            ]
-
-        educationRow = Grid.row []
-            [ Grid.col []
-                [ toUnstyled <| div
-                    [ id "education"
-                    , css
-                        [ marginTop <| px 10
-                        , textAlign center
-                        ]
-                    ]
-                    [ div []
-                        [ h2 []
-                            [ text "Education"]
-                        ]
-                    ]
-                , toUnstyled <| div []
-                    <| List.map educationCardHorizontal educations
-                    ++ List.map educationCardVertical educations
-                ]
-            ]
 
         projectCard data =
             let
@@ -363,6 +231,48 @@ view model =
                     ++ List.map projectCardWide projects
                 ]
             ]
+
+        educationRow = cardListRowView "Education"
+            <| List.map (\x ->
+                { title = x.institution
+                , subtitle = Just x.info
+                , duration = Just <| Right
+                    { from = x.from
+                    , until = x.until
+                    }
+                , content = div [] <| List.map fromUnstyled <| Markdown.toHtml Nothing x.description
+                , picture = x.picture
+                }) educations
+
+        experienceRow = cardListRow "Experience"
+                |> cardListRowImageHeight 150
+                |> cardListRowImageWidth 150
+                |> (cardListRowWithConfig
+                    <| List.map (\x ->
+                        { title = x.name
+                        , subtitle = Just x.info
+                        , duration = Just <| Right
+                            { from = x.from
+                            , until = x.until
+                            }
+                        , content = div [] <| List.map fromUnstyled <| Markdown.toHtml Nothing x.description
+                        , picture = x.picture
+                        }) model.profile.experiences
+                   )
+
+        achievementRow = cardListRow "Achievement"
+                |> cardListRowImageHeight 150
+                |> cardListRowImageWidth 150
+                |> (cardListRowWithConfig
+                    <| List.map (\x ->
+                        { title = x.name
+                        , subtitle = Nothing
+                        , duration = Just <| Left x.date
+                        , content = div [] <| List.map fromUnstyled <| Markdown.toHtml Nothing x.description
+                        , picture = x.picture
+                        }) model.profile.achievements
+                   )
+
     in
         { title = "Profile"
         , body =
@@ -395,7 +305,169 @@ view model =
                     , toUnstyled <| hr [] []
                     , educationRow
                     , projectRow
+                    , experienceRow
+                    , achievementRow
                     ]
                 ]
             ]
         }
+
+type alias Duration =
+    { from : String
+    , until : String
+    }
+
+type alias CardListData =
+    { title : String
+    , subtitle : Maybe String
+    , duration : Maybe (Either String Duration)
+    , content : Html Message.Message
+    , picture : String
+    }
+
+type alias CardListConfig =
+    { imageWidth : Int
+    , imageHeight : Int
+    , header : String
+    }
+
+cardListHorizontal conf data = div
+    [ class "d-none d-sm-block"
+    , css
+        [ marginBottom <| px 10
+        ]
+    ]
+    [ Card.config []
+        |> Card.block []
+            [ Block.text []
+                [ toUnstyled <| div
+                    [ css
+                        [ position relative
+                        , float left
+                        , height <| pct 100
+                        ]
+                    ]
+                    [ img
+                          [ src data.picture
+                          , css
+                              [ borderRadius <| pct 5
+                              , height <| px conf.imageHeight
+                              , width <| px conf.imageWidth
+                              ]
+                          ] []
+                    ]
+                , toUnstyled <| div
+                    [ css
+                        [ marginLeft <| px <| conf.imageWidth + 15
+                        ]
+                    ]
+                    [ div
+                        [ css [ marginBottom <| px 10 ]
+                        ]
+                        [ h4
+                            [ css
+                                [ marginBottom <| px 0
+                                ]
+                            ]
+                            [ text data.title ]
+                        , renderSubtitle data.subtitle
+                        , renderDate data.duration
+                        ]
+                    , div [] [ data.content ]
+                    ]
+                ]
+            ]
+        |> Card.view
+        |> fromUnstyled
+    ]
+
+cardListVertical conf data = div
+    [ class "d-block d-sm-none"
+    , css
+        [ marginBottom <| px 10
+        ]
+    ]
+    [ Card.config []
+        |> Card.block []
+            [ Block.text [] [ toUnstyled <| div []
+                [ div
+                    [ css
+                        [ Css.textAlign center
+                        ]
+                    ]
+                    [ img
+                          [ src <| data.picture
+                          , css
+                              [ borderRadius <| pct 5
+                              , height <| px conf.imageHeight
+                              , width <| px conf.imageWidth
+                              ]
+                          ] []
+                    , h4 [] [ text data.title ]
+                    , renderSubtitle data.subtitle
+                    , renderDate data.duration
+                    ]
+                , hr [] []
+                , div []
+                    [ div [] [ data.content ]
+                    ]
+                ]
+            ] ]
+        |> Card.view
+        |> fromUnstyled
+    ]
+
+renderSubtitle str = Maybe.withDefault (div [] []) <| Maybe.map
+    ( \x ->
+        div
+              [ css
+                  [ fontSize <| px 15
+                  ]
+              ]
+              [ text x ]
+    ) str
+
+renderDate date =
+    let
+        dateText text = unify
+                   <| mapRight (\x -> x.from ++ " - " ++ x.until)
+                   <| text
+    in
+        Maybe.withDefault (div [] []) <| Maybe.map
+            (\x -> div
+                 [ css
+                     [ fontSize <| px 13
+                     ]
+                 ] [ text <| dateText x ]
+              ) date
+
+cardListRowWithConfig data conf = Grid.row []
+    [ Grid.col []
+        [ toUnstyled <| div
+            [ id conf.header
+            , css
+                [ marginTop <| px 10
+                , textAlign center
+                ]
+            ]
+            [ div []
+                [ h2 []
+                    [ text conf.header ]
+                ]
+            ]
+        , toUnstyled <| div []
+            <| List.map (cardListHorizontal conf) data
+            ++ List.map (cardListVertical conf) data
+        ]
+    ]
+
+cardListRowView header data = cardListRowWithConfig data <| cardListRow header
+
+cardListRow header =
+    { imageHeight = 150
+    , imageWidth = 120
+    , header = header
+    }
+
+cardListRowImageWidth val conf = { conf | imageWidth = val }
+cardListRowImageHeight val conf = { conf | imageHeight = val }

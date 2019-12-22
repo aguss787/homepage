@@ -11,11 +11,15 @@ class MonadIO m => ProfileHandler m where
 
 instance ProfileHandler IO where
     getProfile pool = flip runSqlPool pool $ do
-        profile <- selectList [] [LimitTo 1]
-        educations <- selectList [] []
-        projects <- selectList [] []
-        return $ Just Model.CompleteProfile 
-            { Model.profile = DB.entityHead profile
-            , Model.educations = map entityVal educations
-            , Model.projects = map entityVal projects
+        profile      <- selectList [] [LimitTo 1]
+        educations   <- selectList [Model.EducationActive ==. True] [Asc Model.EducationId]
+        projects     <- selectList [] [Asc Model.ProjectId]
+        experiences  <- selectList [] [Asc Model.ExperienceId]
+        achievements <- selectList [] [Asc Model.AchievementId]
+        return $ Just Model.CompleteProfile
+            { Model.profile      = DB.entityHead profile
+            , Model.educations   = map entityVal educations
+            , Model.projects     = map entityVal projects
+            , Model.experiences  = map entityVal experiences
+            , Model.achievements = map entityVal achievements
             }

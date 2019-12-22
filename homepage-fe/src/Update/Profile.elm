@@ -10,6 +10,7 @@ import Model exposing (Model)
 fetchCatImageUrl : Cmd Message
 fetchCatImageUrl =
     Http.get
+        --{ url = "https://profile.agus.dev/profile"
         { url = "http://localhost:8080/profile"
         , expect = Http.expectJson (\x -> Message.ProfileMessage (Profile.GotResult x)) Profile.completeProfileDecoder
         }

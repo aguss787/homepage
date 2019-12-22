@@ -38,6 +38,8 @@ emptySpecificModel =
                 }
             , educations = []
             , projects = []
+            , experiences = []
+            , achievements = []
             }
         }
     }

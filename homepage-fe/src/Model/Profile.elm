@@ -48,16 +48,51 @@ projectDecoder = map4 Project
     (field "projectLogo" string)
     (field "projectLink" string)
 
+type alias Experience =
+    { name : String
+    , info : String
+    , from : String
+    , until : String
+    , description : String
+    , picture : String
+    }
+
+experienceDecoder = map6 Experience
+    (field "experienceName" string)
+    (field "experienceInfo" string)
+    (field "experienceFrom" string)
+    (field "experienceUntil" string)
+    (field "experienceDescription" string)
+    (field "experiencePicture" string)
+
+
+type alias Achievement =
+    { name : String
+    , date : String
+    , description : String
+    , picture : String
+    }
+
+achievementDecoder = map4 Achievement
+    (field "achievementName" string)
+    (field "achievementDate" string)
+    (field "achievementDescription" string)
+    (field "achievementPicture" string)
+
 type alias CompleteProfile =
     { profile : Profile
     , educations : List Education
     , projects : List Project
+    , experiences : List Experience
+    , achievements : List Achievement
     }
 
-completeProfileDecoder = map3 CompleteProfile
+completeProfileDecoder = map5 CompleteProfile
     (field "profile" profileDecoder)
     (field "educations" <| list educationDecoder)
     (field "projects" <| list projectDecoder)
+    (field "experiences" <| list experienceDecoder)
+    (field "achievements" <| list achievementDecoder)
 
 type alias Model =
     { profile : CompleteProfile
