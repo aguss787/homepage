@@ -7,7 +7,7 @@ import Html.Styled exposing (div, toUnstyled, fromUnstyled)
 import Html.Styled.Attributes exposing (css)
 import Css exposing (..)
 import Utils.View.Adaptor exposing (Adaptor)
-import Bootstrap.Grid exposing (containerFluid, container, simpleRow, col)
+import Bootstrap.Grid exposing (container, simpleRow, col)
 import Bootstrap.Navbar as Navbar
 import Message as Message
 import Message.Container as Container
@@ -37,8 +37,8 @@ cssLink str =
 
 template : Model -> List (Html Message) -> List (Html Message)
 template model content =
-    [ cssLink "https://agus.dev/bootstrap.min.css"
-    , cssLink "https://agus.dev/font-awesome.min.css"
+    [ cssLink "https://cdn.agus.dev/bootstrap.min.css"
+    , cssLink "https://cdn.agus.dev/font-awesome.min.css"
     , container []
         [ Navbar.config (\x -> Message.ContainerMessage <| Container.NavbarMsg x)
           |> Navbar.withAnimation
@@ -46,7 +46,7 @@ template model content =
           |> Navbar.lightCustom Color.white
           |> Navbar.brand [ href "/#"] [ text "Agus.dev"]
           |> Navbar.items
-              [ Navbar.itemLink [href "https://agus.dev/resume.mp4"]  [ text "Resume"]
+              [ Navbar.itemLink [href "https://cdn.agus.dev/resume.mp4"]  [ text "Resume"]
               ]
           |> Navbar.view model.model.container.navbar
         , simpleRow
