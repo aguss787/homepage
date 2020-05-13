@@ -4,7 +4,7 @@ import Browser exposing (Document)
 import Css exposing (..)
 import Html.Attributes exposing (style)
 import Html.Styled exposing (..)
-import Html.Styled.Attributes exposing (css, href, src, class, id, target)
+import Html.Styled.Attributes exposing (alt, class, css, href, id, rel, src)
 import Model.Profile as Profile
 import Bootstrap.Grid as Grid
 import Bootstrap.Card as Card
@@ -59,6 +59,7 @@ view model =
                 ]
             , img
                 [ src profile.picture
+                , alt profile.picture
                 , css
                     [ borderRadius <| pct 50
                     , height <| px 150
@@ -81,6 +82,7 @@ view model =
                             ]
                             [ img
                                 [ src profile.picture
+                                , alt profile.picture
                                 , css
                                     [ borderRadius <| pct 50
                                     , height <| px 150
@@ -135,6 +137,7 @@ view model =
             in
                 a
                     [ href data.link
+                    , rel "noopener"
                     , Html.Styled.Attributes.target "_blank"
                     , css
                         [ color inherit
@@ -155,6 +158,7 @@ view model =
                             |> Card.header [ style "height" "500px" ]
                                 [ toUnstyled <| img
                                     [ src data.logo
+                                    , alt data.logo
                                     , css
                                         [ width logoWidth
                                         ]
@@ -175,6 +179,7 @@ view model =
             in
                 a
                 [ href data.link
+                , rel "noopener"
                 , Html.Styled.Attributes.target "_blank"
                 , css
                     [ color inherit
@@ -194,6 +199,7 @@ view model =
                         |> Card.header [ style "height" "500px" ]
                             [ toUnstyled <| img
                                 [ src data.logo
+                                , alt data.logo
                                 , css
                                     [ width logoWidth
                                     ]
@@ -349,6 +355,7 @@ cardListHorizontal conf data = div
                     ]
                     [ img
                           [ src data.picture
+                          , alt data.picture
                           , css
                               [ borderRadius <| pct 5
                               , height <| px conf.imageHeight
@@ -397,6 +404,7 @@ cardListVertical conf data = div
                     ]
                     [ img
                           [ src <| data.picture
+                          , alt data.picture
                           , css
                               [ borderRadius <| pct 5
                               , height <| px conf.imageHeight
